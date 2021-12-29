@@ -28,5 +28,5 @@ namespace map {
 
 	Map::Map(std::string filename, std::size_t prefix_length)
 			:IMap(std::move(filename)),
-			 m_prefix_length{ prefix_length } { };
+			 m_prefix_length{ prefix_length } { }
 }
