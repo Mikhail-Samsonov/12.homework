@@ -5,9 +5,10 @@
 #include <vector>
 #include <list>
 
-namespace controller {
+namespace controller
+{
 	Controller::Controller(std::size_t map_threads, std::size_t reduce_threads)
-			:m_map_threads(map_threads), m_reduce_threads(reduce_threads)
+			: m_map_threads(map_threads), m_reduce_threads(reduce_threads)
 	{
 	}
 
@@ -16,19 +17,24 @@ namespace controller {
 			ThreadPool& map_workers)
 	{
 		using map_result_t = std::future<std::list<std::string>>;
+		using Iter = std::list<std::string>::iterator;
+
 		std::vector<map_result_t> mapped(m_map_threads);
-		for (std::size_t i = 0; i < m_map_threads; ++i) {
-			auto map_job = [i, &range_vector, &map_functor]() -> std::list<std::string> {
-			  return map_functor(range_vector[i]);
+		for (std::size_t i = 0; i < m_map_threads; ++i)
+		{
+			auto map_job = [i, &range_vector, &map_functor]() -> std::list<std::string>
+			{
+				return map_functor(range_vector[i]);
 			};
 			mapped[i] = map_workers.enqueue(map_job);
 		}
 
 		std::list<std::string> list_merge;
-		for (map_result_t& future_result : mapped)
+		for (map_result_t& future_result: mapped)
 			list_merge.merge(future_result.get());
 
-		std::vector<std::string> map_result_vector(std::move_iterator(list_merge.begin()), std::move_iterator(list_merge.end()));
+		std::vector<std::string> map_result_vector(std::move_iterator<Iter>(list_merge.begin()),
+				std::move_iterator<Iter>(list_merge.end()));
 		return map_result_vector;
 	}
 
@@ -42,9 +48,11 @@ namespace controller {
 		std::ptrdiff_t step = map_result_vector.size() / m_reduce_threads;
 		it prev = map_result_vector.begin();
 		it next;
-		for (std::size_t i = 0; i < m_reduce_threads; ++i) {
+		for (std::size_t i = 0; i < m_reduce_threads; ++i)
+		{
 			next = (map_result_vector.end() - prev < step ? map_result_vector.end() : prev + step);
-			if (next == map_result_vector.end()) {
+			if (next == map_result_vector.end())
+			{
 				range_vector[i].first = prev;
 				range_vector[i].second = next;
 				prev = next;
@@ -58,15 +66,18 @@ namespace controller {
 		}
 
 		std::vector<std::future<bool>> reducer(m_reduce_threads);
-		for (std::size_t i = 0; i < m_reduce_threads; ++i) {
-			auto reduce_job = [reduce_functor, i, &range_vector]() -> bool {
-			  return reduce_functor(range_vector[i].first, range_vector[i].second);
+		for (std::size_t i = 0; i < m_reduce_threads; ++i)
+		{
+			auto reduce_job = [reduce_functor, i, &range_vector]() -> bool
+			{
+				return reduce_functor(range_vector[i].first, range_vector[i].second);
 			};
 			reducer[i] = reduce_workers.enqueue(reduce_job);
 		}
 
 		bool answer = true;
-		for (std::future<bool>& future_result : reducer) {
+		for (std::future<bool>& future_result: reducer)
+		{
 			if (!future_result.get())
 				answer = false;
 		}
@@ -84,7 +95,8 @@ namespace controller {
 		ThreadPool map_workers(m_map_threads);
 		ThreadPool reduce_workers(m_reduce_threads);
 
-		for (;; ++prefix_length) {
+		for (;; ++prefix_length)
+		{
 			{
 				map::Map m(filename, prefix_length);
 				map_result_vector = map(range_vector, m, map_workers);

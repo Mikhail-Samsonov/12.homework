@@ -22,7 +22,7 @@ namespace map {
 		std::ifstream stream{ filename() };
 		stream.seekg(range.first);
 		std::string str(range.second - range.first, '\0');
-		stream.read(str.data(), range.second - range.first);
+		stream.read(const_cast<char*>(str.data()), range.second - range.first);
 		return str;
 	}
 

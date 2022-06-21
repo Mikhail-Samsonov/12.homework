@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.10)
 
 set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PATCH_VERSION 0.0.${PATCH_VERSION})
-project(task_12 VERSION ${PATCH_VERSION})
+project(mapreduce VERSION ${PATCH_VERSION})
 
 set(HEADERS
         src/thread_pool/ThreadPool.h
@@ -22,37 +22,31 @@ set(SOURCES
         src/controller/Controller.cpp
         )
 
-add_executable(task_12
+add_executable(mapreduce
         main.cpp
         ${SOURCES}
         ${HEADERS}
         )
 
-target_include_directories(task_12 PRIVATE "${CMAKE_SOURCE_DIR}/src/map")
-target_include_directories(task_12 PRIVATE "${CMAKE_SOURCE_DIR}/src/split")
-target_include_directories(task_12 PRIVATE "${CMAKE_SOURCE_DIR}/src/thread_pool")
-target_include_directories(task_12 PRIVATE "${CMAKE_SOURCE_DIR}/src/reduce")
-target_include_directories(task_12 PRIVATE "${CMAKE_SOURCE_DIR}/src/controller")
+target_include_directories(mapreduce PRIVATE "${CMAKE_SOURCE_DIR}/src/map")
+target_include_directories(mapreduce PRIVATE "${CMAKE_SOURCE_DIR}/src/split")
+target_include_directories(mapreduce PRIVATE "${CMAKE_SOURCE_DIR}/src/thread_pool")
+target_include_directories(mapreduce PRIVATE "${CMAKE_SOURCE_DIR}/src/reduce")
+target_include_directories(mapreduce PRIVATE "${CMAKE_SOURCE_DIR}/src/controller")
 
-target_link_libraries(task_12 pthread)
+target_link_libraries(mapreduce pthread)
 
-set_target_properties(task_12 PROPERTIES
+set_target_properties(mapreduce PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
         )
 
-#set_target_properties(task_12 PROPERTIES COMPILE_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
-#set_target_properties(task_12 PROPERTIES LINK_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
+#set_target_properties(mapreduce PROPERTIES COMPILE_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
+#set_target_properties(mapreduce PROPERTIES LINK_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
 
-if(MSVC)
-    target_compile_options(task_12 PRIVATE
-            /W4
-            )
-else()
-    target_compile_options(task_12 PRIVATE
-            -Werror -Wall -Wimplicit-fallthrough -pedantic-errors
-            )
-endif()
+enable_testing()
+add_subdirectory(test)
+
 
 set(CPACK_GENERATOR DEB)
 set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
